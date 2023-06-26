@@ -53,6 +53,7 @@ def get_bbox_from_geojson(bucket_name, key_name):
 
 def lambda_handler(event, context):
     # TODO implement
+    print("_____LATEST DEPLOYMENT _______")
     print("Received event: " + json.dumps(event, indent=2))
     
     farm_id = event["queryStringParameters"]["farmID"]
