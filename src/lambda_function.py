@@ -16,7 +16,7 @@ def expand_bbox(bbox, margin):
     max_lon += margin
     max_lat += margin
 
-    return [min_lon, min_lat, max_lon, max_lat]
+    return [[min_lon, min_lat], [max_lon, max_lat]]
 
 def get_bbox_from_geojson(bucket_name, key_name):
     
