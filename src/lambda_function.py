@@ -2,12 +2,21 @@ import json
 import boto3
 from shapely.geometry import Polygon
 from shapely.geometry.base import dump_coords
-import rasterio
 
 
 s3 = boto3.client("s3")
 bucket_name = "boundary-plot"
-bucket_raster = "sentinel-2-cogs-rnil"
+
+def expand_bbox(bbox, margin):
+    min_lon, min_lat, max_lon, max_lat = bbox
+
+    # Expand the bounding box by adding/subtracting the margin
+    min_lon -= margin
+    min_lat -= margin
+    max_lon += margin
+    max_lat += margin
+
+    return [[min_lon, min_lat], [max_lon, max_lat]]
 
 def get_bbox_from_geojson(bucket_name, key_name):
     
@@ -24,10 +33,23 @@ def get_bbox_from_geojson(bucket_name, key_name):
     coordinates = geojson_data['geometry']['coordinates']
     polygon = Polygon(coordinates[0])
     b = polygon.bounds
-    bbox = [[b[0],b[1]],[b[2],b[3]]]
+    bbox = expand_bbox(b, 0.00001)
+
+
+    #bbox = [[b[0],b[1]],[b[2],b[3]]]
     print(bbox, type(bbox))
     
-    
+    '''
+    # Flatten the list of coordinates
+    flattened_coords = [item for sublist in coordinates for item in sublist]
+    # Extract min and max values for each dimension
+    min_x, min_y = min(coord[0] for coord in flattened_coords), min(coord[1] for coord in flattened_coords)
+    max_x, max_y = max(coord[0] for coord in flattened_coords), max(coord[1] for coord in flattened_coords)
+    # Swap min and max values for y (latitude) to align with north-oriented map
+    #min_y, max_y = max_y, min_y
+    # Return lower left and upper right coordinates
+    bbox = [[min_x, min_y], [max_x, max_y]]
+    '''
     
     
     print(bbox)
@@ -47,10 +69,10 @@ def lambda_handler(event, context):
     print("_____LATEST DEPLOYMENT _______")
     print("Received event: " + json.dumps(event, indent=2))
     
-    farmID = event["queryStringParameters"]["farmID"]
-    farmName = event["queryStringParameters"]["farmName"]
+    farm_id = event["queryStringParameters"]["farmID"]
+    farm_name = event["queryStringParameters"]["farmName"]
     
-    geojson_key = f"{farmID}_{farmName}.geojson"
+    geojson_key = f"{farm_id}_{farm_name}.geojson"
     
     try :
         
@@ -71,23 +93,8 @@ def lambda_handler(event, context):
         }
     
     print(area, type(area))
-
-    try :
-        objects = s3.list_objects_v2(Bucket=bucket_raster, Prefix=f"{farmID}_{farmName}")['Contents']
-        print(type(objects), objects)
-        res = next(iter(objects))
-        
-        print(res)
-
-        s3.download_file(bucket_name,res,f"/tmp/{farmID}_raster.tif")
-
-        with rasterio.open(f"/tmp/{farmID}_raster.tif") as src:
-
-            bbox_ras = src.get_bbox()
-
-        print(bbox_ras,imageoverlaycoords)
-    except:
-        print("Error downloading")
+    
+    
     
     result = {
         "imageoverlaycoords" : imageoverlaycoords,
