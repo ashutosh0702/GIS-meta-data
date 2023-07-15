@@ -33,7 +33,7 @@ def get_bbox_from_geojson(bucket_name, key_name):
     coordinates = geojson_data['geometry']['coordinates']
     polygon = Polygon(coordinates[0])
     b = polygon.bounds
-    bbox = expand_bbox(b, 0.000001)
+    bbox = expand_bbox(b, 0.00001)
 
 
     #bbox = [[b[0],b[1]],[b[2],b[3]]]
