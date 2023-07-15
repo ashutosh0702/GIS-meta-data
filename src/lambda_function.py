@@ -3,9 +3,20 @@ import boto3
 from shapely.geometry import Polygon
 from shapely.geometry.base import dump_coords
 
+
 s3 = boto3.client("s3")
 bucket_name = "boundary-plot"
 
+def expand_bbox(bbox, margin):
+    min_lon, min_lat, max_lon, max_lat = bbox
+
+    # Expand the bounding box by adding/subtracting the margin
+    min_lon -= margin
+    min_lat -= margin
+    max_lon += margin
+    max_lat += margin
+
+    return [min_lon, min_lat, max_lon, max_lat]
 
 def get_bbox_from_geojson(bucket_name, key_name):
     
@@ -22,8 +33,10 @@ def get_bbox_from_geojson(bucket_name, key_name):
     coordinates = geojson_data['geometry']['coordinates']
     polygon = Polygon(coordinates[0])
     b = polygon.bounds
-    
-    bbox = [[b[0],b[1]],[b[2],b[3]]]
+    bbox = expand_bbox(b, 10)
+
+
+    #bbox = [[b[0],b[1]],[b[2],b[3]]]
     print(bbox, type(bbox))
     
     '''
