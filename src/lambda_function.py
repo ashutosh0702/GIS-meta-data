@@ -21,6 +21,9 @@ def expand_bbox(bbox, margin):
 def get_bbox_from_geojson(bucket_name, key_name):
     
     try:
+        print("Downloading")
+        d = s3.list_objects_v2(Bucket=bucket_name,Prefix=key_name)
+        print(d)
         response = s3.get_object(Bucket=bucket_name, Key=key_name)
         
     except:
@@ -73,6 +76,7 @@ def lambda_handler(event, context):
     farm_name = event["queryStringParameters"]["farmName"]
     
     geojson_key = f"{farm_id}_{farm_name}.geojson"
+    print(geojson_key)
     
     try :
         
