@@ -2,6 +2,7 @@ import json
 import boto3
 from shapely.geometry import Polygon
 from shapely.geometry.base import dump_coords
+import utm 
 
 
 s3 = boto3.client("s3")
@@ -17,6 +18,33 @@ def expand_bbox(bbox, margin):
     max_lat += margin
 
     return [[min_lon, min_lat], [max_lon, max_lat]]
+
+def stretch_bbox(bbox, gsd=10):
+    
+    stretch_amount = gsd / 2.0
+
+    lat1, lon1 = bbox[0]
+    utm_x1, utm_y1, _, _ = utm.from_latlon(lat1, lon1)
+
+    lat2, lon2 = bbox[1]
+    utm_x2, utm_y2, _, _ = utm.from_latlon(lat2, lon2)
+
+    stretched_utm_bbox = [
+        [utm_x1 - stretch_amount, utm_y1 - stretch_amount],
+        [utm_x2 + stretch_amount, utm_y2 + stretch_amount]
+    ]
+
+    latlon1 = utm.to_latlon(stretched_utm_bbox[0][0], stretched_utm_bbox[0][1], zone_number=utm.from_latlon(lat1, lon1)[2], northern=lat1 >= 0)
+    latlon2 = utm.to_latlon(stretched_utm_bbox[1][0], stretched_utm_bbox[1][1], zone_number=utm.from_latlon(lat2, lon2)[2], northern=lat2 >= 0)
+
+    stretched_bbox = [list(latlon1), list(latlon2)]
+
+    print(stretch_bbox)
+    
+    return stretched_bbox
+
+
+
 
 def get_bbox_from_geojson(bucket_name, key_name):
     
@@ -41,28 +69,19 @@ def get_bbox_from_geojson(bucket_name, key_name):
 
     #bbox = [[b[0],b[1]],[b[2],b[3]]]
     print(bbox, type(bbox))
+    # Stretch the bbox by 10 meters GSD
+    stretched_bbox = stretch_bbox(bbox, gsd=10)
+
+    # The new bbox after stretching in latitude and longitude format
+    print(stretched_bbox)
     
-    '''
-    # Flatten the list of coordinates
-    flattened_coords = [item for sublist in coordinates for item in sublist]
-    # Extract min and max values for each dimension
-    min_x, min_y = min(coord[0] for coord in flattened_coords), min(coord[1] for coord in flattened_coords)
-    max_x, max_y = max(coord[0] for coord in flattened_coords), max(coord[1] for coord in flattened_coords)
-    # Swap min and max values for y (latitude) to align with north-oriented map
-    #min_y, max_y = max_y, min_y
-    # Return lower left and upper right coordinates
-    bbox = [[min_x, min_y], [max_x, max_y]]
-    '''
-    
-    
-    print(bbox)
     polygon = Polygon(coordinates[0])
     wkt = polygon.wkt
    
     #Get the area of the polygon feature
     area = geojson_data['properties']['area']
     
-    return bbox, wkt, area
+    return stretched_bbox, wkt, area
     
     
 
