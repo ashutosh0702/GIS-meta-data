@@ -19,7 +19,7 @@ def expand_bbox(bbox, margin):
 
     return [[min_lon, min_lat], [max_lon, max_lat]]
 
-def stretch_bbox(bbox, gsd=0.0001):
+def stretch_bbox(bbox, gsd=20):
     
     stretch_amount = gsd / 2.0
 
