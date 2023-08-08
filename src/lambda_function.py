@@ -19,7 +19,7 @@ def expand_bbox(bbox, margin):
 
     return [[min_lon, min_lat], [max_lon, max_lat]]
 
-def stretch_bbox(bbox, gsd=20):
+def stretch_bbox(bbox, gsd):
     
     stretch_amount = gsd / 2.0
 
@@ -70,7 +70,7 @@ def get_bbox_from_geojson(bucket_name, key_name):
     #bbox = [[b[0],b[1]],[b[2],b[3]]]
     print(bbox, type(bbox))
     # Stretch the bbox by 10 meters GSD
-    stretched_bbox = stretch_bbox(bbox, gsd=10)
+    stretched_bbox = stretch_bbox(bbox, gsd=5)
 
     # The new bbox after stretching in latitude and longitude format
     print(stretched_bbox)
