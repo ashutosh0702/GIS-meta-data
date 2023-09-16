@@ -26,8 +26,8 @@ def get_bbox_from_geojson(bucket_name, key_name):
     
     coordinates = geojson_data['geometry']['coordinates']
     polygon = Polygon(coordinates[0])
-    bbox = polygon.bounds
-   
+    b = polygon.bounds
+    bbox = [[b[1],b[0]][b[3],b[2]]]
     
     polygon = Polygon(coordinates[0])
     wkt = polygon.wkt
