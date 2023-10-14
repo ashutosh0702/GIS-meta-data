@@ -22,7 +22,11 @@ def get_bbox_from_geojson(bucket_name, key_name):
         
     geojson_str = response['Body'].read().decode('utf-8')
     
+    print(geojson_str)
+    
     geojson_data = json.loads(geojson_str)
+    
+    print(geojson_data)
     
     coordinates = geojson_data['geometry']['coordinates']
     polygon = Polygon(coordinates[0])
@@ -36,7 +40,7 @@ def get_bbox_from_geojson(bucket_name, key_name):
    
     #Get the area of the polygon feature
     area = geojson_data['properties']['area']
-    
+    print(bbox,wkt,area)
     #return stretched_bbox, wkt, area
     return bbox , wkt , area
     
