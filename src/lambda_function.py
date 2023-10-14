@@ -17,9 +17,11 @@ def get_bbox_from_geojson(bucket_name, key_name):
         print(d)
         response = s3.get_object(Bucket=bucket_name, Key=key_name)
         
-    except:
+    except Exception as e:
+        print(e)
         return "Not Found"
-        
+    
+       
     geojson_str = response['Body'].read().decode('utf-8')
     
     print(geojson_str)
