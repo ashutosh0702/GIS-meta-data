@@ -10,11 +10,12 @@ bucket_name = "boundary-plot"
 
 
 def get_bbox_from_geojson(bucket_name, key_name):
-    
+    print(f"KEY : {key_name}")
     try:
         print("Downloading")
         d = s3.list_objects_v2(Bucket=bucket_name,Prefix=key_name)
         print(d)
+        print("Getting Response")
         response = s3.get_object(Bucket=bucket_name, Key=key_name)
         
     except Exception as e:
